@@ -10,9 +10,3 @@ frontend-angular/node_modules/
 frontend-angular/dist/
 frontend-angular/.angular/cache/
 
-### IDE / Sistema ###
-.vscode/
-*.iml
-.idea/
-.DS_Store
-Thumbs.db

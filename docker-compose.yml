@@ -3,11 +3,11 @@ services:
     image: postgres:13
     container_name: donations-db
     environment:
-      POSTGRES_DB: donationsdb
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5433"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
