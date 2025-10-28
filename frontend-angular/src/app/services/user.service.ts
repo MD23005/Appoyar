@@ -16,6 +16,8 @@ export class UserService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/usuarios';
 
+  // Genera un nombre de usuario legible a partir de una direccion de email
+
   private generateUsernameFromEmail(email: string): string {
     const usernamePart = email.split('@')[0];
     
@@ -28,10 +30,14 @@ export class UserService {
     return 'Usuario_' + Math.random().toString(36).substring(2, 8);
   }
 
+  // Crea un nuevo usuario en la base de datos del backend
+
   createUser(userData: CreateUserRequest): Observable<User> {
     console.log('Enviando datos al backend:', userData);
     return this.http.post<User>(this.apiUrl, userData);
   }
+
+  // Sincroniza un usuario de Auth0 con la base de datos del backend
 
   syncUserAfterAuth0(auth0User: any): Observable<User> {
     let nombre = '';
@@ -54,9 +60,13 @@ export class UserService {
     return this.createUser(userData);
   }
 
+  // Obtiene todos los usuarios registrados en el sistema
+
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.apiUrl);
   }
+
+  // Busca un usuario por su dirección de email
 
   getUserByEmail(email: string): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/correo/${email}`);

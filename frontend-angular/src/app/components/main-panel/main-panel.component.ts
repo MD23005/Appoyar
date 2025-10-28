@@ -6,40 +6,8 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   selector: 'app-main-panel',
   standalone: true,
   imports: [RouterOutlet, SidebarComponent],
-  template: `
-    <div class="main-container">
-      <app-sidebar [isCollapsed]="sidebarCollapsed()" 
-                  (toggleSidebar)="toggleSidebar()"></app-sidebar>
-      
-      <div class="main-content" [class.collapsed]="sidebarCollapsed()">
-        <div class="content-area">
-          <router-outlet></router-outlet>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .main-container {
-      display: flex;
-      min-height: 100vh;
-      background-color: var(--primary-light);
-    }
-
-    .main-content {
-      flex: 1;
-      margin-left: 250px;
-      transition: margin-left 0.3s ease;
-    }
-
-    .main-content.collapsed {
-      margin-left: 64px;
-    }
-
-    .content-area {
-      padding: 2rem;
-      min-height: 100vh;
-    }
-  `]
+  templateUrl: './main-panel.component.html',
+  styleUrls: ['./main-panel.component.css']
 })
 export class MainPanelComponent {
   sidebarCollapsed = signal(false);

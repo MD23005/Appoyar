@@ -8,6 +8,8 @@ import { Auth0IntegrationService } from '../services/auth0.service';
 export class Auth0SyncInterceptor implements HttpInterceptor {
   constructor(private auth0Service: Auth0IntegrationService) {}
 
+  // Intercepta todas las peticiones HTTP de la aplicación
+
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (req.url.includes('/api/usuarios') && req.method === 'POST') {
       return next.handle(req);

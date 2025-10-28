@@ -10,15 +10,19 @@ export class Auth0IntegrationService {
   private auth = inject(AuthService);
   private userService = inject(UserService);
 
+  // Maneja el flujo de autenticacion y sincronizacion de usuarios
+
   user$ = this.auth.user$.pipe(
-    filter(user => !!user),
+    filter(user => !!user),        // Solo procesa cuando hay un usuario autenticado
     tap(user => {
       console.log('Usuario de Auth0:', user);
-      this.syncUserWithBackend(user);
+      this.syncUserWithBackend(user);   // Sincroniza automaticamente con el backend
     })
   );
 
   isAuthenticated$ = this.auth.isAuthenticated$;
+
+  // Genera un nombre de usuario a partir de la información de Auth0
 
   private generateUsername(auth0User: any): string {
   
@@ -46,6 +50,8 @@ export class Auth0IntegrationService {
 
     return 'Usuario_' + auth0User.sub.substring(0, 8);
   }
+
+  // Sincroniza el usuario de Auth0 con la base de datos del backend
 
   private syncUserWithBackend(auth0User: any) {
     const generatedName = this.generateUsername(auth0User);
@@ -77,13 +83,19 @@ export class Auth0IntegrationService {
     });
   }
 
+  // Verifica si el usuario está actualmente autenticado
+
   isAuthenticated() {
     return this.auth.isAuthenticated$;
   }
 
+  // Obtiene la informacion del usuario actualmente autenticado
+
   getUser() {
     return this.auth.user$;
   }
+
+  // Inicia el proceso de login redirigiendo a la pagina de Auth0
 
   login() {
     this.auth.loginWithRedirect({
@@ -94,6 +106,8 @@ export class Auth0IntegrationService {
     });
   }
 
+  // Inicia el proceso de registro redirigiendo a la pagina de Auth0
+
   signup() {
     this.auth.loginWithRedirect({
       authorizationParams: {
@@ -102,6 +116,8 @@ export class Auth0IntegrationService {
       appState: { target: '/panel' }
     });
   }
+
+  // Cierra la sesión del usuario actual y redirige a la pagina principal
 
   logout() {
     this.auth.logout({

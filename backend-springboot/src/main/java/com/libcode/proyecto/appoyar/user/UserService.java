@@ -12,6 +12,8 @@ public class UserService {
         this.repository = repository;
     }
 
+    // Guarda un usuario en la base de datos
+
     public User guardarUsuario(User user) {
         Optional<User> usuarioExistente = repository.findByCorreo(user.getCorreo());
         if (usuarioExistente.isPresent()) {
@@ -25,9 +27,13 @@ public class UserService {
         return repository.save(user);
     }
 
+    // Obtiene todos los usuarios registrados en el sistema
+
     public List<User> obtenerTodosLosUsuarios() {
         return repository.findAll();
     }
+
+    // Busca un usuario por su correo electrónico
 
     public User obtenerUsuarioPorCorreo(String correo) {
         return repository.findByCorreo(correo)

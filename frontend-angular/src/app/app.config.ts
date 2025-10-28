@@ -8,6 +8,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(),
+
+    // Configuración principal de Auth0
     
     AuthModule.forRoot({
       domain: 'dev-hsanq3qm5ekjk2si.us.auth0.com', //Dominio Auth0

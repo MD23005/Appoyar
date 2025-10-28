@@ -7,38 +7,22 @@ import { Router } from '@angular/router';
   selector: 'app-auth-button',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="auth-container" *ngIf="auth.isAuthenticated$ | async; else loggedOut">
-      <button class="btn-primary" (click)="logout()">
-        Cerrar Sesión
-      </button>
-    </div>
-    
-    <ng-template #loggedOut>
-      <div class="auth-container">
-        <button class="btn-primary" (click)="login()">
-          Iniciar Sesión
-        </button>
-      </div>
-    </ng-template>
-  `,
-  styles: [`
-    .auth-container {
-      display: flex;
-      justify-content: center;
-      margin: 1rem 0;
-    }
-  `]
+  templateUrl: './auth-button.component.html',
+  styleUrls: ['./auth-button.component.css']
 })
 export class AuthButtonComponent {
   auth = inject(AuthService);
   private router = inject(Router);
+
+  // Inicia el proceso de login redirigiendo a Auth0
 
   login(): void {
     this.auth.loginWithRedirect({
       appState: { target: '/panel' }
     });
   }
+
+  // Cierra y limpia la sesión de Auth0 y redirige a la página principal
 
   logout(): void {
     this.auth.logout({

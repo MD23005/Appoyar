@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200")  // Permite requests desde Angular
 @RestController
 @RequestMapping("/api/usuarios")
 public class UserController {
@@ -16,6 +16,8 @@ public class UserController {
     public UserController(UserService service) {
         this.service = service;
     }
+
+    // Endpoint para registrar un nuevo usuario en el sistema
 
     @PostMapping
     public User registrarUsuario(@RequestBody CreateUserRequest userRequest) {
@@ -37,6 +39,8 @@ public class UserController {
         return usuarioGuardado;
     }
 
+    // Limpia y formatea el nombre del usuario
+
     private String limpiarNombre(String nombre) {
         if (nombre == null || nombre.trim().isEmpty()) {
             return "Usuario";
@@ -50,6 +54,8 @@ public class UserController {
         
         return nombreLimpio;
     }
+
+    // Genera un nombre amigable a partir del email
     
     private String generarNombreAmigable(String input) {
         String base = input.split("@")[0];
@@ -63,10 +69,15 @@ public class UserController {
         return base.substring(0, 1).toUpperCase() + base.substring(1).toLowerCase();
     }
 
+    // Endpoint para obtener todos los usuarios registrados
+
     @GetMapping
     public List<User> obtenerUsuarios() {
         return service.obtenerTodosLosUsuarios();
     }
+
+    // Endpoint para buscar un usuario por su correo electronico
+    
     @GetMapping("/correo/{correo}")
     public User obtenerUsuarioPorCorreo(@PathVariable String correo) {
         return service.obtenerUsuarioPorCorreo(correo);
