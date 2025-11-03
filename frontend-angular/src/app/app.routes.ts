@@ -5,6 +5,9 @@ import { LoginComponent } from './components/authentication/login/login.componen
 import { ProfileComponent } from './components/authentication/profile/profile.component';
 import { AuthCallbackComponent } from './components/authentication/auth-callback/auth-callback.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { OrganizationListComponent } from './components/organizations/organization-list/organization-list.component';
+import { OrganizationDetailComponent } from './components/organizations/organization-detail/organization-detail.component';
+import { OrganizationFormComponent } from './components/organizations/organization-form/organization-form.component';
 
 export const routes: Routes = [
   { path: '', component: WelcomeComponent },
@@ -21,8 +24,12 @@ export const routes: Routes = [
     component: MainPanelComponent,
     children: [
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'organizations', component: OrganizationListComponent },
+      { path: 'organizations/new', component: OrganizationFormComponent },
+      { path: 'organizations/:nit', component: OrganizationDetailComponent },
+      { path: 'organizations/edit/:nit', component: OrganizationFormComponent },
       { path: 'perfil', component: ProfileComponent },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' } 
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
   { path: '**', redirectTo: '' }
