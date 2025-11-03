@@ -15,6 +15,15 @@
         <span class="material-icons">dashboard</span>
         <span *ngIf="!isCollapsed()">Dashboard</span>
       </a>
+
+     <!-- Organizaciones -->
+      <a class="nav-item" 
+         routerLink="/panel/organizations" 
+         routerLinkActive="active"
+         [class.collapsed]="isCollapsed()">
+        <span class="material-icons">business</span>
+        <span *ngIf="!isCollapsed()">Organizaciones</span>
+      </a>
       
       <a class="nav-item" 
          routerLink="/panel/perfil" 
