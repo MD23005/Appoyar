@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/public/store")
 @CrossOrigin(origins = "http://localhost:4200") // Angular
@@ -17,6 +18,7 @@ public class ProductController {
         this.service = service;
     }
 
+    
     // GET /api/public/store/products
     @GetMapping("/products")
     public List<Product> getAll() {
