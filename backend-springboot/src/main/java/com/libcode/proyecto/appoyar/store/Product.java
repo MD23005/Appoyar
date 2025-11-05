@@ -19,6 +19,7 @@ public class Product {
 
     private String descripcion;
 
+    
     // precio en tokens o dólares
     @NotNull
     @Column(nullable = false, precision = 10, scale = 2)
