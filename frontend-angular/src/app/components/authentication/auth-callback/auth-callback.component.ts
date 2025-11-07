@@ -14,11 +14,26 @@ export class AuthCallbackComponent implements OnInit {
   private auth = inject(AuthService);
   private router = inject(Router);
 
-  // Se ejecuta cuando el componente se inicializa
+  ngOnInit(): void {
+    this.auth.handleRedirectCallback().subscribe({
+      next: (result) => {
+        // 1) si Auth0 envió un destino en appState
+        const target = (result?.appState as any)?.target;
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.router.navigate(['/panel']);
-    }, 2000);
+        // 2) si el guard te mandó con ?returnUrl=/panel/tienda
+        const returnUrl = this.router.routerState.snapshot.root.queryParams['returnUrl'];
+
+        if (returnUrl) {
+          this.router.navigateByUrl(returnUrl);
+        } else if (target) {
+          this.router.navigateByUrl(target);
+        } else {
+          this.router.navigate(['/panel/dashboard']);
+        }
+      },
+      error: () => {
+        this.router.navigate(['/error']);
+      }
+    });
   }
 }
