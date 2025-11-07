@@ -1,14 +1,15 @@
-# puedes eliminar la línea version si quieres; Compose moderno la ignora
 services:
   postgres:
     image: postgres:13
     container_name: donations-db
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "5433:5432"
+      - "5433:5432"   # host:container -> desde host conectar en localhost:5433
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -25,8 +26,10 @@ services:
       context: ./backend-springboot
       dockerfile: Dockerfile
     container_name: donations-backend
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/postgres}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/${POSTGRES_DB:-postgres}}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-postgres}
       SPRING_JPA_HBM2DDL: ${SPRING_JPA_HBM2DDL:-update}
