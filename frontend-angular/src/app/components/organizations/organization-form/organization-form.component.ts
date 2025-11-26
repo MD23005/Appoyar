@@ -64,11 +64,6 @@ export class OrganizationFormComponent implements OnInit {
         Validators.required, 
         Validators.email,
         Validators.maxLength(50)
-      ]],
-      contraseña: ['', [
-        Validators.required, 
-        Validators.minLength(6),
-        Validators.maxLength(50)
       ]]
     });
   }
@@ -138,7 +133,6 @@ export class OrganizationFormComponent implements OnInit {
       nombreInscriptor: formData.nombreInscriptor ? formData.nombreInscriptor.trim() : '',
       rol: formData.rol ? formData.rol.trim() : '',
       correo: formData.correo ? formData.correo.trim() : '',
-      contraseña: formData.contraseña ? formData.contraseña.trim() : ''
     };
   }
 
@@ -157,8 +151,7 @@ export class OrganizationFormComponent implements OnInit {
           logoUrl: cleanedData.logoUrl,
           nombreInscriptor: cleanedData.nombreInscriptor,
           rol: cleanedData.rol,
-          correo: cleanedData.correo,
-          contraseña: cleanedData.contraseña
+          correo: cleanedData.correo
         };
 
         console.log('Enviando datos al backend:', organizationData);

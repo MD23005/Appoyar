@@ -6,5 +6,4 @@ export interface Organization {
   nombreInscriptor: string;
   rol: string;
   correo: string;
-  contraseña: string;
 }

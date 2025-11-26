@@ -53,7 +53,6 @@ public class OrganizationService {
                     organizacionExistente.setNombreInscriptor(organizacionActualizada.getNombreInscriptor());
                     organizacionExistente.setRol(organizacionActualizada.getRol());
                     organizacionExistente.setCorreo(organizacionActualizada.getCorreo());
-                    organizacionExistente.setContraseña(organizacionActualizada.getContraseña());
                     return repository.save(organizacionExistente);
                 })
                 .orElseThrow(() -> new RuntimeException("Organización no encontrada con NIT: " + nit));

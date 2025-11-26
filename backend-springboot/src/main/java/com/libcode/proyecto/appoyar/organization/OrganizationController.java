@@ -131,15 +131,7 @@ public class OrganizationController {
                 return ResponseEntity.badRequest().body(Map.of("error", "El correo no puede tener más de 50 caracteres"));
             }
             
-            if (organizacion.getContraseña() == null || organizacion.getContraseña().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "La contraseña es requerida"));
-            }
-            
             // Validar longitud mínima de contraseña
-
-            if (organizacion.getContraseña().length() < 6) {
-                return ResponseEntity.badRequest().body(Map.of("error", "La contraseña debe tener al menos 6 caracteres"));
-            }
             
             Organization organizacionGuardada = service.guardarOrganizacion(organizacion);
             logger.info("Organización creada exitosamente con NIT: {}", organizacionGuardada.getNit());
@@ -187,10 +179,6 @@ public class OrganizationController {
 
             if (organizacion.getCorreo() != null && organizacion.getCorreo().length() > 50) {
                 return ResponseEntity.badRequest().body(Map.of("error", "El correo no puede tener más de 50 caracteres"));
-            }
-            
-            if (organizacion.getContraseña() != null && organizacion.getContraseña().length() < 6) {
-                return ResponseEntity.badRequest().body(Map.of("error", "La contraseña debe tener al menos 6 caracteres"));
             }
             
             Organization organizacionActualizada = service.actualizarOrganizacion(nit, organizacion);
