@@ -111,22 +111,6 @@
           <span *ngIf="organizationForm.get('correo')?.errors?.['maxlength']">El correo no puede tener más de 50 caracteres</span>
         </div>
       </div>
-
-      <div class="form-group">
-        <label for="contraseña">Contraseña *</label>
-        <input 
-          type="password" 
-          id="contraseña" 
-          formControlName="contraseña" 
-          placeholder="Mínimo 6 caracteres"
-          class="form-control"
-          maxlength="51">
-        <div *ngIf="organizationForm.get('contraseña')?.invalid && organizationForm.get('contraseña')?.touched" class="error-message">
-          <span *ngIf="organizationForm.get('contraseña')?.errors?.['required']">La contraseña es requerida</span>
-          <span *ngIf="organizationForm.get('contraseña')?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
-          <span *ngIf="organizationForm.get('contraseña')?.errors?.['maxlength']">La contraseña no puede tener más de 50 caracteres</span>
-        </div>
-      </div>
     </div>
 
     <div class="form-section">

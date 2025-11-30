@@ -1,6 +1,9 @@
 package com.libcode.proyecto.appoyar.organization;
 
 import jakarta.persistence.*;
+import java.util.List;
+import com.libcode.proyecto.appoyar.donation.Donation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "organizaciones")
@@ -28,9 +31,10 @@ public class Organization {
     @Column(name = "correo", length = 50)
     private String correo;
 
-    @Column(name = "contraseña", length = 50)
-    private String contraseña;
-
+    // Relación uno a muchos con Donation 
+    @OneToMany(mappedBy = "organizacion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Donation> donaciones;
 
     public Organization() {
     }
@@ -44,7 +48,6 @@ public class Organization {
         this.nombreInscriptor = nombreInscriptor;
         this.rol = rol;
         this.correo = correo;
-        this.contraseña = contraseña;
     }
 
     // Getters and Setters
@@ -103,13 +106,24 @@ public class Organization {
     public void setCorreo(String correo) { 
         this.correo = correo; 
     }
-
-    public String getContraseña() { 
-        return contraseña; 
-    }
     
-    public void setContraseña(String contraseña) { 
-        this.contraseña = contraseña; 
+    public List<Donation> getDonaciones() {
+        return donaciones;
+    }
+
+    public void setDonaciones(List<Donation> donaciones) {
+        this.donaciones = donaciones;
+    }
+
+    @Transient
+    public Integer getCantidadDonaciones() {
+        return donaciones != null ? donaciones.size() : 0;
+    }
+
+    @Transient
+    public Double getTotalRecaudado() {
+        return donaciones != null ? 
+            donaciones.stream().mapToDouble(Donation::getMonto).sum() : 0.0;
     }
 
     @Override
