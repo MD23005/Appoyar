@@ -1,9 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { StoreService } from '../../services/store.service';
+
+import { StoreService, PurchaseResponse } from '../../services/store.service';
 import { UserRolesService } from '../../services/user-roles.service';
+import { UserService } from '../../services/user.service';
+
 import { Product } from '../../models/product.model';
+import { User } from '../../models/user.model';
+
 import { Observable, take } from 'rxjs';
 
 @Component({
@@ -16,6 +21,7 @@ import { Observable, take } from 'rxjs';
 export class StoreListComponent implements OnInit {
   private storeService = inject(StoreService);
   private userRolesService = inject(UserRolesService);
+  private userService = inject(UserService);
 
   products: Product[] = [];
 
@@ -39,6 +45,12 @@ export class StoreListComponent implements OnInit {
     imagenUrl: ''
   };
 
+  // NUEVO: usuario actual (con puntos)
+  currentUser: User | null = null;
+
+  // NUEVO: estado de compra
+  isBuying = false;
+
   constructor() {
     // Inicializar los observables de permisos
     this.canEdit$ = this.userRolesService.canEditProducts();
@@ -48,18 +60,23 @@ export class StoreListComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+
+    // Suscribirse al usuario del backend para tener los puntos en esta pantalla
+    this.userService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
   }
 
   load() {
-    this.loading = true; 
+    this.loading = true;
     this.storeService.getProducts().subscribe({
       next: (data) => {
         this.products = data;
-        this.loading = false; 
+        this.loading = false;
       },
       error: (err) => {
         console.error('Error cargando productos', err);
-        this.loading = false; 
+        this.loading = false;
       }
     });
   }
@@ -99,7 +116,7 @@ export class StoreListComponent implements OnInit {
 
   save() {
     const permission$ = this.editingProduct ? this.canEdit$ : this.canCreate$;
-    
+
     permission$.pipe(take(1)).subscribe(canProceed => {
       if (!canProceed) {
         alert('No tienes permisos para guardar productos.');
@@ -135,7 +152,7 @@ export class StoreListComponent implements OnInit {
         alert('No tienes permisos para eliminar productos.');
         return;
       }
-      
+
       if (!product.id) return;
       if (!confirm('¿Eliminar este producto?')) return;
 
@@ -143,6 +160,77 @@ export class StoreListComponent implements OnInit {
         next: () => this.load(),
         error: (err) => console.error('Error eliminando producto', err)
       });
+    });
+  }
+
+  // ========= COMPRAR PRODUCTOS CON PUNTOS =========
+
+  // Verificar si el usuario tiene puntos suficientes para un producto
+  canBuy(product: Product): boolean {
+    if (!this.currentUser) return false;
+
+    const price = Number(product.precio ?? 0);
+    const available = this.currentUser.puntos ?? 0;
+
+    return price > 0 && available >= price;
+  }
+
+  onBuy(product: Product) {
+    if (!this.currentUser) {
+      alert('Debes iniciar sesión para poder comprar.');
+      return;
+    }
+
+    if (!product.id) {
+      alert('El producto no tiene un identificador válido.');
+      return;
+    }
+
+    const price = Number(product.precio ?? 0);
+    const available = this.currentUser.puntos ?? 0;
+
+    if (price <= 0) {
+      alert('El precio del producto no es válido.');
+      return;
+    }
+
+    if (available < price) {
+      alert(`No tienes puntos suficientes. Tienes ${available} y el producto cuesta ${price}.`);
+      return;
+    }
+
+    const confirmed = confirm(
+      `¿Confirmas la compra de "${product.nombre}" por ${price} puntos?`
+    );
+
+    if (!confirmed) {
+      return; // Canceló la compra
+    }
+
+    this.isBuying = true;
+
+    this.storeService.purchaseProduct({
+      productId: product.id,
+      quantity: 1
+    }).subscribe({
+      next: (resp: PurchaseResponse) => {
+        // Actualizar puntos localmente usando la respuesta
+        const remaining = resp.remainingPoints ?? (available - price);
+
+        this.currentUser = {
+          ...this.currentUser!,
+          puntos: remaining
+        };
+        this.userService.setCurrentUser(this.currentUser);
+
+        this.isBuying = false;
+        alert('Compra realizada correctamente.');
+      },
+      error: (err) => {
+        console.error('Error al realizar la compra', err);
+        this.isBuying = false;
+        alert('Ocurrió un error al realizar la compra. Intenta de nuevo.');
+      }
     });
   }
 }

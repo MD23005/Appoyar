@@ -43,12 +43,19 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/organizaciones").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/organizaciones/**").permitAll()
+                // GET productos tienda
+                .requestMatchers(HttpMethod.GET, "/api/public/store/products").permitAll()
 
                 // Rutas protegidas, requieren permisos específicos de Auth0 
                 .requestMatchers(HttpMethod.POST, "/api/organizaciones").hasAuthority("write:organizations")
                 .requestMatchers(HttpMethod.PUT, "/api/organizaciones/**").hasAuthority("write:organizations")
                 .requestMatchers(HttpMethod.DELETE, "/api/organizaciones/**").hasAuthority("write:organizations")
                 .requestMatchers("/api/admin/**").hasAuthority("write:organizations")
+
+                // COMPRAS EN TIENDA
+                .requestMatchers(HttpMethod.POST, "/api/store/purchases").authenticated()
+
+
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2
