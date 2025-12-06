@@ -1,25 +1,26 @@
 services:
-  postgres:
-    image: postgres:13
-    container_name: donations-db
-    env_file:
-      - .env
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5433:5432"   
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - donations-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # === COMENTADO: Servicio PostgreSQL local (ahora usamos Neon) ===
+  # postgres:
+  #   image: postgres:13
+  #   container_name: donations-db
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     POSTGRES_DB: ${POSTGRES_DB:-postgres}
+  #     POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  #   ports:
+  #     - "5433:5432"   
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - donations-network
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   backend:
     build:
@@ -36,6 +37,7 @@ services:
       SPRING_JPA_SHOW_SQL: ${SPRING_JPA_SHOW_SQL:-true}
       SERVER_PORT: ${SERVER_PORT:-8080}
       APP_UPLOAD_DIR: ${APP_UPLOAD_DIR:-/uploads}
+      
       # ---Variables de Auth0 ---
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE}
       AUTH0_ISSUER_URI: ${AUTH0_ISSUER_URI}
@@ -46,9 +48,9 @@ services:
       - "8080:8080"
     volumes:
       - backend_uploads:/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
+    # depends_on:  # Comentado porque no usamos PostgreSQL local
+    #   postgres:
+    #     condition: service_healthy
     networks:
       - donations-network
     restart: unless-stopped
@@ -65,7 +67,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  # postgres_data:  # Comentado porque no usamos PostgreSQL local
   backend_uploads:
 
 networks:

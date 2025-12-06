@@ -1,4 +1,5 @@
 package com.libcode.proyecto.appoyar.user;
+
 import jakarta.persistence.*;
 import java.util.List;
 import com.libcode.proyecto.appoyar.donation.Donation;
@@ -21,6 +22,10 @@ public class User {
     @Column(name = "password_hash", length = 255) 
     private String passwordHash;
 
+    // Puntos acumulados del usuario en la app
+    @Column(name = "puntos", nullable = false)
+    private Integer puntos = 0;
+
     // Relación uno a muchos con Donation 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -33,6 +38,7 @@ public class User {
         this.nombre = nombre;
         this.correo = correo;
         this.passwordHash = passwordHash;
+        this.puntos = 0;
     }
 
     // Getters y setters
@@ -47,6 +53,9 @@ public class User {
 
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+    public Integer getPuntos() { return puntos; }
+    public void setPuntos(Integer puntos) { this.puntos = puntos; }
 
     public List<Donation> getDonaciones() { return donaciones; }
     public void setDonaciones(List<Donation> donaciones) { this.donaciones = donaciones; }

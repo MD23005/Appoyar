@@ -1,1 +1,17 @@
-<router-outlet></router-outlet>
+<div class="app-container">
+  <router-outlet></router-outlet>
+
+  <!-- Badge global de puntos: solo dentro de /panel/** y usuario autenticado -->
+  <ng-container *ngIf="showGlobalPoints">
+    <ng-container *ngIf="auth0Service.isAuthenticated() | async as isAuth">
+      <ng-container *ngIf="isAuth">
+        <ng-container *ngIf="currentUser$ | async as user">
+          <div class="points-badge">
+            <span class="material-icons">grade</span>
+            <span>{{ user.puntos ?? 0 }} pts</span>
+          </div>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</div>

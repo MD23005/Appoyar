@@ -1,6 +1,8 @@
 <div class="main-container">
-  <app-sidebar [isCollapsed]="sidebarCollapsed()" 
-              (toggleSidebar)="toggleSidebar()"></app-sidebar>
+  <app-sidebar
+    [isCollapsed]="sidebarCollapsed()"
+    (toggleSidebar)="toggleSidebar()">
+  </app-sidebar>
   
   <div class="main-content" [class.collapsed]="sidebarCollapsed()">
     <div class="content-area">

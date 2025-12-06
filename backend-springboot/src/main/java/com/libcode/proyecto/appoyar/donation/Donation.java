@@ -41,9 +41,14 @@ public class Donation {
     @Column(name = "referencia_pago", length = 50)
     private String referenciaPago;
 
+    // Puntos que generó esta donación
+    @Column(name = "puntos_ganados")
+    private Integer puntosGanados = 0;
+
     public Donation() {
         this.fechaDonacion = LocalDateTime.now();
         this.estado = "COMPLETADO";
+        this.puntosGanados = 0;
     }
 
     // Constructor que acepta una organización existente
@@ -81,4 +86,7 @@ public class Donation {
     
     public String getReferenciaPago() { return referenciaPago; }
     public void setReferenciaPago(String referenciaPago) { this.referenciaPago = referenciaPago; }
+
+    public Integer getPuntosGanados() { return puntosGanados; }
+    public void setPuntosGanados(Integer puntosGanados) { this.puntosGanados = puntosGanados; }
 }

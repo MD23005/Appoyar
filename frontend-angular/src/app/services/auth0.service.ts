@@ -1,6 +1,7 @@
+// frontend-angular/src/app/services/auth0.service.ts
 import { Injectable, inject } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { filter, tap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { UserService } from './user.service';
 
 @Injectable({
@@ -10,22 +11,22 @@ export class Auth0IntegrationService {
   private auth = inject(AuthService);
   private userService = inject(UserService);
 
-  // Maneja el flujo de autenticacion y sincronizacion de usuarios
-
-  user$ = this.auth.user$.pipe(
-    filter(user => !!user),        // Solo procesa cuando hay un usuario autenticado
-    tap(user => {
-      console.log('Usuario de Auth0:', user);
-      this.syncUserWithBackend(user);   // Sincroniza automaticamente con el backend
-    })
-  );
-
+  // Observables expuestos tal cual por si alguna vista los necesita
+  user$ = this.auth.user$;
   isAuthenticated$ = this.auth.isAuthenticated$;
 
-  // Genera un nombre de usuario a partir de la información de Auth0
+  constructor() {
+    // En cuanto Auth0 notifique un usuario, lo sincronizamos con el backend
+    this.auth.user$
+      .pipe(filter(user => !!user))
+      .subscribe(user => {
+        console.log('Usuario de Auth0:', user);
+        this.syncUserWithBackend(user);
+      });
+  }
 
+  // Genera un nombre de usuario a partir de la información de Auth0
   private generateUsername(auth0User: any): string {
-  
     if (auth0User.name && auth0User.name !== auth0User.email) {
       return auth0User.name;
     }
@@ -37,14 +38,12 @@ export class Auth0IntegrationService {
     const email = auth0User.email;
     if (email) {
       const usernamePart = email.split('@')[0];
-      
       const cleanName = usernamePart.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-      
+
       if (cleanName && cleanName.length > 1) {
-    
         return cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
       }
-      
+
       return 'Usuario_' + auth0User.sub.substring(0, 5);
     }
 
@@ -52,10 +51,9 @@ export class Auth0IntegrationService {
   }
 
   // Sincroniza el usuario de Auth0 con la base de datos del backend
-
   private syncUserWithBackend(auth0User: any) {
     const generatedName = this.generateUsername(auth0User);
-    
+
     const userData = {
       nombre: generatedName,
       correo: auth0User.email,
@@ -71,11 +69,23 @@ export class Auth0IntegrationService {
 
     this.userService.createUser(userData).subscribe({
       next: (user) => {
-        console.log('Usuario sincronizado con backend:', user);
+        console.log('Usuario sincronizado con backend (creado):', user);
+        // Guardar el usuario (con sus puntos) en el estado global
+        this.userService.setCurrentUser(user);
       },
       error: (error) => {
         if (error.status === 400 || error.status === 409) {
-          console.log('Usuario ya existe en la base de datos');
+          // Ya existe, obtenerlo desde el backend para tener sus puntos actualizados
+          console.log('Usuario ya existe en la base de datos, obteniendo registro actual...');
+          this.userService.getUserByEmail(auth0User.email).subscribe({
+            next: (existingUser) => {
+              console.log('Usuario existente obtenido del backend:', existingUser);
+              this.userService.setCurrentUser(existingUser);
+            },
+            error: (err) => {
+              console.error('Error obteniendo usuario existente desde el backend:', err);
+            }
+          });
         } else {
           console.error('Error sincronizando usuario:', error);
         }
@@ -84,19 +94,16 @@ export class Auth0IntegrationService {
   }
 
   // Verifica si el usuario está actualmente autenticado
-
   isAuthenticated() {
     return this.auth.isAuthenticated$;
   }
 
-  // Obtiene la informacion del usuario actualmente autenticado
-
+  // Obtiene la informacion del usuario actualmente autenticado (Auth0)
   getUser() {
     return this.auth.user$;
   }
 
   // Inicia el proceso de login redirigiendo a la pagina de Auth0
-
   login() {
     this.auth.loginWithRedirect({
       authorizationParams: {
@@ -107,7 +114,6 @@ export class Auth0IntegrationService {
   }
 
   // Inicia el proceso de registro redirigiendo a la pagina de Auth0
-
   signup() {
     this.auth.loginWithRedirect({
       authorizationParams: {
@@ -118,7 +124,6 @@ export class Auth0IntegrationService {
   }
 
   // Cierra la sesión del usuario actual y redirige a la pagina principal
-
   logout() {
     this.auth.logout({
       logoutParams: {
