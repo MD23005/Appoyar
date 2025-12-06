@@ -4,16 +4,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import com.libcode.proyecto.appoyar.user.User;
 import com.libcode.proyecto.appoyar.user.UserRepository;
 
-//Servicio para manejar las operaciones de donaciones
+// Servicio para manejar las operaciones de donaciones
 
 @Service
 @Transactional
 public class DonationService {
-    
+
     private final DonationRepository donationRepository;
     private final UserRepository userRepository;
 
@@ -23,7 +25,7 @@ public class DonationService {
     }
 
     // Registra una nueva donación en el sistema
-    // y tambien actualiza los puntos del usuario
+    // y también actualiza los puntos del usuario
 
     public Donation registrarDonacion(Donation donation) {
 
@@ -58,31 +60,36 @@ public class DonationService {
         return donacionGuardada;
     }
 
-    // Regla de negocio: 1 punto por cada unidad monetaria donada
-    // (ejemplo: monto = 23.75 -> 23 puntos)
+    // Regla de negocio: 100 puntos por cada unidad monetaria donada
+    // Ejemplos:
+    //   monto = 20.0  -> 2000 puntos
+    //   monto = 25.5  -> 2550 puntos
     private int calcularPuntos(Double monto) {
         if (monto == null || monto <= 0) {
             return 0;
         }
-        return monto.intValue();
+        BigDecimal bdMonto = BigDecimal.valueOf(monto);
+        BigDecimal puntos = bdMonto.multiply(BigDecimal.valueOf(100));
+        // Redondeamos hacia abajo para no regalar puntos extra por decimales raros
+        return puntos.setScale(0, RoundingMode.DOWN).intValueExact();
     }
 
-    //Obtiene todas las donaciones de una organización
+    // Obtiene todas las donaciones de una organización
     public List<Donation> obtenerDonacionesPorOrganizacion(String nitOrganizacion) {
         return donationRepository.findByOrganizacionNit(nitOrganizacion);
     }
 
-    //Obtiene todas las donaciones de un usuario por su ID
+    // Obtiene todas las donaciones de un usuario por su ID
     public List<Donation> obtenerDonacionesPorUsuario(Long idUsuario) {
         return donationRepository.findByUsuarioId(idUsuario);
     }
 
-    //Obtiene el historial de donaciones de un usuario a una organización específica
+    // Obtiene el historial de donaciones de un usuario a una organización específica
     public List<Donation> obtenerHistorialDonaciones(String nitOrganizacion, Long idUsuario) {
         return donationRepository.findByOrganizacionNitAndUsuarioId(nitOrganizacion, idUsuario);
     }
 
-    //Obtiene el total donado a una organización
+    // Obtiene el total donado a una organización
     public Double obtenerTotalDonadoPorOrganizacion(String nitOrganizacion) {
         return donationRepository.sumMontoByOrganizacionNit(nitOrganizacion);
     }
