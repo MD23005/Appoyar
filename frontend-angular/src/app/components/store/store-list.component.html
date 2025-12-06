@@ -4,6 +4,12 @@
   <button *ngIf="canCreate$ | async" class="btn-primary" (click)="startCreate()">+ Nuevo producto</button>
 </div>
 
+<!-- Info de puntos del usuario -->
+<div class="user-points-info" *ngIf="currentUser">
+  <strong>Tus puntos disponibles:</strong>
+  <span>{{ currentUser.puntos ?? 0 }} pts</span>
+</div>
+
 <!-- formulario de crear/editar -->
 <div class="product-form" *ngIf="isEditing">
   <h3>{{ editingProduct?.id ? 'Editar producto' : 'Nuevo producto' }}</h3>
@@ -19,8 +25,8 @@
   </label>
 
   <label>
-    Precio
-    <input type="number" step="0.01" [(ngModel)]="form.precio" name="precio" required />
+    Precio (en puntos)
+    <input type="number" step="1" [(ngModel)]="form.precio" name="precio" required />
   </label>
 
   <label>
@@ -49,11 +55,26 @@
     <div class="product-body">
       <h3>{{ product.nombre }}</h3>
       <p>{{ product.descripcion }}</p>
-      <span class="price">$ {{ product.precio }}</span>
+      <span class="price">{{ product.precio }} pts</span>
 
+      <!-- Acciones de admin -->
       <div class="actions">
         <button *ngIf="canEdit$ | async" class="btn-light" (click)="onEdit(product)">Editar</button>
         <button *ngIf="canDelete$ | async" class="btn-danger" (click)="onDelete(product)">Eliminar</button>
+      </div>
+
+      <!-- Acción de compra (para cualquier usuario autenticado) -->
+      <div class="buy-section" *ngIf="currentUser">
+        <button
+          class="btn-primary"
+          [disabled]="!canBuy(product) || isBuying"
+          (click)="onBuy(product)">
+          Canjear por {{ product.precio }} pts
+        </button>
+
+        <p *ngIf="!canBuy(product)" class="insufficient-points">
+          No tienes puntos suficientes para este producto.
+        </p>
       </div>
     </div>
   </div>
