@@ -22,6 +22,12 @@
           {{ user.email_verified ? 'Sí' : 'No' }}
         </span>
       </div>
+
+      <!-- Puntos actuales desde backend -->
+      <div class="info-item" *ngIf="currentUser$ | async as currentUser">
+        <label>Puntos actuales:</label>
+        <span class="username">{{ currentUser.puntos ?? 0 }}</span>
+      </div>
     </div>
 
     <div class="profile-actions">

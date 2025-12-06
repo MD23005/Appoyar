@@ -2,7 +2,11 @@ package com.libcode.proyecto.appoyar.donation;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+
+import com.libcode.proyecto.appoyar.user.User;
+import com.libcode.proyecto.appoyar.user.UserRepository;
 
 //Servicio para manejar las operaciones de donaciones
 
@@ -11,37 +15,74 @@ import java.util.List;
 public class DonationService {
     
     private final DonationRepository donationRepository;
+    private final UserRepository userRepository;
 
-    public DonationService(DonationRepository donationRepository) {
+    public DonationService(DonationRepository donationRepository, UserRepository userRepository) {
         this.donationRepository = donationRepository;
+        this.userRepository = userRepository;
     }
 
-    //Registra una nueva donación en el sistema
-    
+    // Registra una nueva donación en el sistema
+    // y tambien actualiza los puntos del usuario
+
     public Donation registrarDonacion(Donation donation) {
-        return donationRepository.save(donation);
+
+        // 1. Calcular puntos generados por esta donación
+        int puntos = calcularPuntos(donation.getMonto());
+        donation.setPuntosGanados(puntos);
+
+        // 2. Guardar la donación
+        Donation donacionGuardada = donationRepository.save(donation);
+
+        // 3. Sumar puntos al usuario (si aplica)
+        if (puntos > 0) {
+            User usuario = donacionGuardada.getUsuario();
+
+            if (usuario == null || usuario.getId() == null) {
+                throw new RuntimeException("La donación no tiene un usuario válido asociado");
+            }
+
+            // Cargar usuario desde BD para asegurarnos de tener el estado actual
+            User usuarioBd = userRepository.findById(usuario.getId())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuario.getId()));
+
+            Integer puntosActuales = (usuarioBd.getPuntos() != null) ? usuarioBd.getPuntos() : 0;
+            usuarioBd.setPuntos(puntosActuales + puntos);
+
+            userRepository.save(usuarioBd);
+
+            // Actualizar referencia del usuario en la donación que devolvemos
+            donacionGuardada.setUsuario(usuarioBd);
+        }
+
+        return donacionGuardada;
+    }
+
+    // Regla de negocio: 1 punto por cada unidad monetaria donada
+    // (ejemplo: monto = 23.75 -> 23 puntos)
+    private int calcularPuntos(Double monto) {
+        if (monto == null || monto <= 0) {
+            return 0;
+        }
+        return monto.intValue();
     }
 
     //Obtiene todas las donaciones de una organización
-
     public List<Donation> obtenerDonacionesPorOrganizacion(String nitOrganizacion) {
         return donationRepository.findByOrganizacionNit(nitOrganizacion);
     }
 
     //Obtiene todas las donaciones de un usuario por su ID
-    
     public List<Donation> obtenerDonacionesPorUsuario(Long idUsuario) {
         return donationRepository.findByUsuarioId(idUsuario);
     }
 
     //Obtiene el historial de donaciones de un usuario a una organización específica
-    
     public List<Donation> obtenerHistorialDonaciones(String nitOrganizacion, Long idUsuario) {
         return donationRepository.findByOrganizacionNitAndUsuarioId(nitOrganizacion, idUsuario);
     }
 
     //Obtiene el total donado a una organización
-    
     public Double obtenerTotalDonadoPorOrganizacion(String nitOrganizacion) {
         return donationRepository.sumMontoByOrganizacionNit(nitOrganizacion);
     }

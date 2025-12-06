@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { User } from '../models/user.model';
 
 export interface CreateUserRequest {
@@ -16,11 +16,21 @@ export class UserService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/usuarios';
 
-  // Genera un nombre de usuario legible a partir de una direccion de email
+  // Estado global del usuario de la app (Backend)
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
 
+  setCurrentUser(user: User | null): void {
+    this.currentUserSubject.next(user);
+  }
+
+  getCurrentUserSnapshot(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  // Genera un nombre de usuario legible a partir de una direccion de email
   private generateUsernameFromEmail(email: string): string {
     const usernamePart = email.split('@')[0];
-    
     const cleanName = usernamePart.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
     
     if (cleanName && cleanName.length > 1) {
@@ -31,14 +41,12 @@ export class UserService {
   }
 
   // Crea un nuevo usuario en la base de datos del backend
-
   createUser(userData: CreateUserRequest): Observable<User> {
     console.log('Enviando datos al backend:', userData);
     return this.http.post<User>(this.apiUrl, userData);
   }
 
   // Sincroniza un usuario de Auth0 con la base de datos del backend
-
   syncUserAfterAuth0(auth0User: any): Observable<User> {
     let nombre = '';
     
@@ -61,13 +69,11 @@ export class UserService {
   }
 
   // Obtiene todos los usuarios registrados en el sistema
-
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.apiUrl);
   }
 
   // Busca un usuario por su dirección de email
-
   getUserByEmail(email: string): Observable<User> {
     return this.http.get<User>(`${this.apiUrl}/correo/${email}`);
   }

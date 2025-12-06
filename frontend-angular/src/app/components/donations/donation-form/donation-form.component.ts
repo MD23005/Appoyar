@@ -38,8 +38,7 @@ export class DonationFormComponent implements OnInit {
   currentUser: User | null = null;
   auth0User: any = null;
 
-   // Variables para control de permisos
-
+  // Variables para control de permisos
   isAdmin$: Observable<boolean>;
   showFictitiousData: boolean = false;
 
@@ -54,8 +53,7 @@ export class DonationFormComponent implements OnInit {
   constructor() {
     this.isAdmin$ = this.userRolesService.isAdmin();
 
-    // control de visibilidad de datos
-    
+    // Control de visibilidad de datos ficticios
     this.isAdmin$.subscribe(isAdmin => {
       this.showFictitiousData = isAdmin;
     });
@@ -99,9 +97,6 @@ export class DonationFormComponent implements OnInit {
   }
 
   // Validador de fecha de expiración
-  // Verifica que la fecha de expiración de la tarjeta sea futura
-  // Compara la fecha ingresada con la fecha actual y retorna error si ya expiró
-
   private futureDateValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     
@@ -114,7 +109,6 @@ export class DonationFormComponent implements OnInit {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth();
-
     const currentMonthFirstDay = new Date(currentYear, currentMonth, 1);
 
     if (expiryDate < currentMonthFirstDay) {
@@ -139,8 +133,6 @@ export class DonationFormComponent implements OnInit {
   }
 
   // Carga el usuario actual desde Auth0 y base de datos
-  // Obtiene el usuario autenticado de Auth0 y sincroniza con la base de datos local
-
   private loadCurrentUser(): void {
     this.auth0Service.getUser().subscribe({
       next: (auth0User) => {
@@ -152,6 +144,7 @@ export class DonationFormComponent implements OnInit {
             next: (user) => {
               console.log('Usuario encontrado en BD:', user);
               this.currentUser = user;
+              this.userService.setCurrentUser(user);
             },
             error: (error) => {
               console.error('Error obteniendo usuario de la base de datos:', error);
@@ -176,14 +169,17 @@ export class DonationFormComponent implements OnInit {
       next: (newUser) => {
         console.log('Usuario creado exitosamente:', newUser);
         this.currentUser = newUser;
+        this.userService.setCurrentUser(newUser);
       },
       error: (error) => {
         console.error('Error creando usuario en BD:', error);
         this.currentUser = {
           id: 0,
           nombre: auth0User.name || auth0User.nickname || 'Usuario',
-          correo: auth0User.email || 'usuario@ejemplo.com'
+          correo: auth0User.email || 'usuario@ejemplo.com',
+          puntos: 0
         };
+        this.userService.setCurrentUser(this.currentUser);
         console.log('Usuario temporal creado:', this.currentUser);
       }
     });
@@ -193,8 +189,10 @@ export class DonationFormComponent implements OnInit {
     this.currentUser = {
       id: 0,
       nombre: 'Usuario No Autenticado',
-      correo: 'usuario@ejemplo.com'
+      correo: 'usuario@ejemplo.com',
+      puntos: 0
     };
+    this.userService.setCurrentUser(this.currentUser);
     console.log('Usuario por defecto creado:', this.currentUser);
   }
 
@@ -233,8 +231,6 @@ export class DonationFormComponent implements OnInit {
   }
 
   // Formatea el número de tarjeta con espacios cada 4 dígitos
-  // Toma el input del usuario y lo formatea automáticamente en grupos de 4 dígitos
-
   formatCardNumber(event: any): void {
     let input = event.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     let formattedInput = '';
@@ -305,19 +301,14 @@ export class DonationFormComponent implements OnInit {
   }
 
   // Procesamiento de un pago con tarjeta de crédito y PayPal
-
   private processCreditCardPayment(): void {
     this.loading = true;
-
-    //Procesamiento de un pago con tarjeta de crédito
 
     setTimeout(() => {
       this.finalizeDonation('TARJETA_CREDITO', `TRX-${Date.now()}`);
       this.loading = false;
     }, 2000);
   }
-
-  // Procesamiento de un pago con PayPal
 
   private processPayPalPayment(): void {
     this.loading = true;
@@ -329,9 +320,6 @@ export class DonationFormComponent implements OnInit {
   }
 
   // Finaliza el proceso de donación enviando datos al backend
-  // Construye el objeto de donación con toda la información necesaria
-  // y lo envía al servicio para ser persistido en la base de datos.
-
   private finalizeDonation(metodoPago: string, referencia: string): void {
     if (!this.currentUser) {
       console.error('No se pudo obtener el usuario actual');
@@ -340,8 +328,6 @@ export class DonationFormComponent implements OnInit {
     }
 
     console.log('Usuario actual para donación:', this.currentUser);
-
-    // Crear la donación con el objeto organización completo
 
     const donation: any = {
       organizacion: {
@@ -362,15 +348,30 @@ export class DonationFormComponent implements OnInit {
     console.log('Enviando donación al servidor:', donation);
 
     this.donationService.registrarDonacion(donation).subscribe({
-      next: (response) => {
+      next: (response: Donation) => {
         console.log('Donación registrada exitosamente:', response);
-        this.donationSuccess.emit();
+
+        // Después de registrar la donación, actualizamos los puntos del usuario
+        if (this.auth0User && this.auth0User.email) {
+          this.userService.getUserByEmail(this.auth0User.email).subscribe({
+            next: (updatedUser) => {
+              console.log('Usuario actualizado tras donación:', updatedUser);
+              this.currentUser = updatedUser;
+              this.userService.setCurrentUser(updatedUser);
+              this.donationSuccess.emit();
+            },
+            error: (error) => {
+              console.error('Error actualizando puntos del usuario tras donación:', error);
+              this.donationSuccess.emit();
+            }
+          });
+        } else {
+          this.donationSuccess.emit();
+        }
       },
       error: (error) => {
         console.error('Error detallado registrando donación:', error);
 
-        // Mostrar mensaje de error más específico
-        
         if (error.status === 500) {
           alert('Error del servidor: No se pudo registrar la donación. Por favor, contacte al administrador.');
         } else if (error.status === 400) {

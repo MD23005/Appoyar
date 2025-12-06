@@ -1,6 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Auth0IntegrationService } from '../../../services/auth0.service';
+import { UserService } from '../../../services/user.service';
+import { Observable } from 'rxjs';
+import { User } from '../../../models/user.model';
 
 @Component({
   selector: 'app-profile',
@@ -11,32 +14,42 @@ import { Auth0IntegrationService } from '../../../services/auth0.service';
 })
 export class ProfileComponent {
 
-  // Servicio de autenticacion que proporciona informacion del usuario
-
+  // Servicio de autenticación (usuario Auth0)
   auth0Service = inject(Auth0IntegrationService);
 
-  // Obtiene el nombre de display mas amigable para el usuario
+  // Servicio de usuarios de backend (con puntos)
+  private userService = inject(UserService);
+  currentUser$: Observable<User | null> = this.userService.currentUser$;
 
+  // Obtiene el nombre de display más amigable para el usuario
   getUserDisplayName(user: any): string {
-    if (user.name && user.name !== user.email) {
+    // Si viniera desde backend y tiene "nombre", usarlo
+    if (user.nombre) {
+      return user.nombre;
+    }
+
+    const email = user.email || user.correo;
+
+    if (user.name && user.name !== email) {
       return user.name;
     }
-    if (user.nickname && user.nickname !== user.email) {
+    if (user.nickname && user.nickname !== email) {
       return user.nickname;
     }
-    
-    const emailPart = user.email.split('@')[0];
-    const cleanName = emailPart.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
-    
-    if (cleanName && cleanName.length > 1) {
-      return cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
+
+    if (email) {
+      const emailPart = email.split('@')[0];
+      const cleanName = emailPart.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+
+      if (cleanName && cleanName.length > 1) {
+        return cleanName.charAt(0).toUpperCase() + cleanName.slice(1).toLowerCase();
+      }
     }
-    
+
     return 'Usuario';
   }
 
-  // Cierra la sesion del usuario actual y redirige a la pagina principal
-
+  // Cierra la sesión del usuario actual y redirige a la página principal
   logout(): void {
     this.auth0Service.logout();
   }

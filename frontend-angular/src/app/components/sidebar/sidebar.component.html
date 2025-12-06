@@ -66,10 +66,19 @@
     </ng-template>
   </nav>
 
-  <div class="user-info" *ngIf="(auth0Service.isAuthenticated() | async) && !isCollapsed() && (auth0Service.getUser() | async) as user">
-    <div class="user-details">
-      <span class="user-name">{{ getUserDisplayName(user) }}</span>
-      <span class="user-email">{{ user.email }}</span>
+  <!-- Info de usuario y puntos -->
+  <div class="user-info"
+       *ngIf="(auth0Service.isAuthenticated() | async) && !isCollapsed()">
+
+    <!-- Datos de Auth0 (nombre/email visuales) -->
+    <div class="user-details" *ngIf="auth0Service.getUser() | async as authUser">
+      <span class="user-name">{{ getUserDisplayName(authUser) }}</span>
+      <span class="user-email">{{ authUser.email }}</span>
+    </div>
+
+    <!-- Puntos desde backend (UserService.currentUser$) -->
+    <div class="user-points" *ngIf="currentUser$ | async as currentUser">
+      <span>Puntos: {{ currentUser.puntos ?? 0 }}</span>
     </div>
   </div>
 </div>

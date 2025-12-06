@@ -1,6 +1,26 @@
+/* Contenedor raíz de la app: no forzamos flex aquí para no afectar login/welcome */
 .app-container {
+  min-height: 100vh;
+}
+
+/* Badge flotante global de puntos (NO afecta layout) */
+.points-badge {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  background-color: #ffffff;
+  border-radius: 999px;
+  padding: 8px 16px;
   display: flex;
-  height: 100vh;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 0.9rem;
+  z-index: 1000;
+}
+
+.points-badge .material-icons {
+  font-size: 18px;
 }
 
 .content {
