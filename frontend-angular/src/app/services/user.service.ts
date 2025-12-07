@@ -14,7 +14,7 @@ export interface CreateUserRequest {
 })
 export class UserService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/usuarios';
+  private apiUrl = 'https://appoyar.onrender.com/api/usuarios';
 
   // Estado global del usuario de la app (Backend)
   private currentUserSubject = new BehaviorSubject<User | null>(null);

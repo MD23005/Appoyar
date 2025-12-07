@@ -24,10 +24,10 @@ export class StoreService {
   private http = inject(HttpClient);
 
   // Productos (públicos)
-  private productsBaseUrl = 'http://localhost:8080/api/public/store';
+  private productsBaseUrl = 'https://appoyar.onrender.com/api/public/store';
 
   // Compras (requiere estar autenticado)
-  private purchasesBaseUrl = 'http://localhost:8080/api/store';
+  private purchasesBaseUrl = 'https://appoyar.onrender.com/api/store';
 
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(`${this.productsBaseUrl}/products`);

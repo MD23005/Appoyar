@@ -8,7 +8,7 @@ import { Organization } from '../models/organization.model';
 })
 export class OrganizationService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/organizaciones';
+  private apiUrl = 'https://appoyar.onrender.com/api/organizaciones';
 
   // Obtiene la lista completa de todas las organizaciones registradas
 

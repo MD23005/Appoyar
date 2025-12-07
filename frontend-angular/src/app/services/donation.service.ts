@@ -11,7 +11,7 @@ import { User } from '../models/user.model';
 })
 export class DonationService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/donaciones';
+  private apiUrl = 'https://appoyar.onrender.com/api/donaciones';
 
   // Registra una nueva donación en el sistema.
   registrarDonacion(donation: Donation): Observable<Donation> {
