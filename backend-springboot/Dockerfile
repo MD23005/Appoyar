@@ -12,11 +12,13 @@ COPY .mvn .mvn
 COPY mvnw ./mvnw
 
 # Descargar dependencias (capa cacheable)
-RUN ./mvnw -B -q -ntp dependency:go-offline
+#RUN ./mvnw -B -q -ntp dependency:go-offline
+RUN mvn -B -q -ntp dependency:go-offline
 
 # Copiar fuente y empaquetar
 COPY src ./src
-RUN ./mvnw -B -q -ntp package -DskipTests
+#RUN ./mvnw -B -q -ntp package -DskipTests
+RUN mvn -B -q -ntp package -DskipTests
 
 # ====== STAGE 2: runtime con JRE 21 ======
 FROM eclipse-temurin:21-jre-jammy
