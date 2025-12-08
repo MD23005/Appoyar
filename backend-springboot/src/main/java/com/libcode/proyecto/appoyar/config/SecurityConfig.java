@@ -91,6 +91,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
 
         // Origen permitido, frontend Angular en puerto 4200
+        config.addAllowedOrigin("https://appoyar-frontend.onrender.com");
         config.addAllowedOrigin("http://localhost:4200");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
